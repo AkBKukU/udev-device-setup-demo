@@ -11,6 +11,9 @@ steps as I can.
 This is written and tested on Ubuntu 17.10 intended for use with Ubuntu or other
 `systemd` distributions but not all system files may be in the same place.
 
+This process is showing how it is done with a nonstandard input device. This
+could also be done with an additional keyboard (with a uniqe USB
+Vendor:Product ID) to have a separate keyboard dedicated to macros.
 
 ## Simple Keyboard Setup
 
@@ -21,7 +24,6 @@ to view the built-in documentation if you want to get an understanding of how
 this process works. I explain most of the steps you will need. But if you get
 lost or something isn't working you can refer to this file for more specific
 details.
-
 
 *This file may be in a different location in a different distros*
 
@@ -43,27 +45,56 @@ evdev:input:b*vYYYYpXXXXe*
 ```
 
 
-### 2. Use `lsusb` to find your device USB IDs
-Run `lsusb` and look for a name that describes the device you are trying to
-setup. For example, here is the line for my footpedal:
+### 2. Use `lsusb` to find your device USB device IDs
+
+Run the command `lsusb` and look for a name that describes the device you are
+trying to setup. For example, here is the line from the output that is for my
+footpedal:
 
 `Bus 003 Device 011: ID 05f3:00ff PI Engineering, Inc. VEC Footpedal`
 
-If you can't determine what your device is in the list you can unplug it and run
-the following commands before and after plugging your device back in.
+You need the hexadecimal numbers that are in the position of the  "05f3:00ff"
+from the example.
+
+If you can't determine which device is yours in the list you can find it by
+looking for the difference of the output before and after plugging your device
+back in. Here are the commands you would run to do this.
 
 ```
-# Unplugged
+# Have device unplugged
 lsusb > /tmp/lsusb
-# Plug the device back in
+# Plug the device in
 lsusb > /tmp/lsusb2
 diff /tmp/lsusb /tmp/lsusb2
 ```
+*The `#` character means "The text after this is a comment". You don't need to type
+these line in.*
+
+*The `>` character means "Send the output from the left to the right instead of
+printing it". On the right we are saving the output to a file in the `/tmp`
+folder. These will be lost after restarting.*
 
 
-3. change the file with usb id
-(Must be uppercase)
+### 3. Update udev file with USB IDs
+
+The two hexidecimal numbers we got with `lsusb` "05f3:00ff" itentify a specific
+product by a specific manufacturer. In this case the manufacturer or "Vendor" ID
+is `05f3` and the "Product" ID is `00ff`.
+
+You will add these numbers to the `/etc/udev/hwdb.d/70-keyboard.hwdb` file you
+created earlier. In the file you will replace the "YYYY" after the "*v*" with
+your "*Vendor*" ID and the "XXXX" after the "*p*" with your "*Product*" ID.
+There are other options that can be changed in this line that we don't need
+right now. These are already set to match everything with the "\*" wildcard
+character."
+
+*udev requires that your vendor and product IDs be uppercase in this file*
+
+`/etc/udev/hwdb.d/70-keyboard.hwdb`
+```
 evdev:input:b*v05F3p00FFe*
+```
+
 
 4. use `ls -l /dev/input/by-id` to get event # or alternatively `udevadm trigger --verbose --sysname-match="event*"` and look for the USB ID
 
