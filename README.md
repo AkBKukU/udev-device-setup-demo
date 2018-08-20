@@ -32,10 +32,9 @@ details.
 directory so we will use `sudo` to elevate the file editing command to run with
 `root` user permissions.*
 
-
-
-Add a line that we will modify to contain your devices USB vendor and product
-ID.
+Open a new file in a text editor with
+`sudo nano /etc/udev/hwdb.d/70-keyboard.hwdb`. Add the following line that we
+will modify in a moment to contain your devices USB information to identify it.
 
 
 `/etc/udev/hwdb.d/70-keyboard.hwdb`
