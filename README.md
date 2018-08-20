@@ -14,7 +14,7 @@ This is written and tested on Ubuntu 17.10 intended for use with Ubuntu or other
 
 ## Simple Keyboard Setup
 
-0. Open `/lib/udev/hwdb.d/60-keyboard.hwdb`
+### 0. Open `/lib/udev/hwdb.d/60-keyboard.hwdb`
 
 Run `less /lib/udev/hwdb.d/60-keyboard.hwdb` and check out the top of the file
 to view the built-in documentation if you want to get an understanding of how
@@ -26,7 +26,7 @@ details.
 *This file may be in a different location in a different distros*
 
 
-1. Create new udev file: `/etc/udev/hwdb.d/70-keyboard.hwdb`
+### 1. Create new udev file: `/etc/udev/hwdb.d/70-keyboard.hwdb`
 
 *You will need higher level permissions to modify files under the `/etc`
 directory so we will use `sudo` to elevate the file editing command to run with
@@ -44,7 +44,7 @@ evdev:input:b*vYYYYpXXXXe*
 ```
 
 
-2. Use `lsusb` to find your device USB IDs
+### 2. Use `lsusb` to find your device USB IDs
 Run `lsusb` and look for a name that describes the device you are trying to
 setup. For example, here is the line for my footpedal:
 
