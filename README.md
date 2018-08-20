@@ -30,7 +30,7 @@ details.
 
 *You will need higher level permissions to modify files under the `/etc`
 directory so we will use `sudo` to elevate the file editing command to run with
-`root` user permissions. *
+`root` user permissions.*
 
 
 
