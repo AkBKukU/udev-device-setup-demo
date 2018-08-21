@@ -101,15 +101,15 @@ evdev:input:b*v05F3p00FFe*
 
 ### 4. Find input event for device
 To read the data from the input device we need to know what the virtual
-interface is. Linux assigns input devices an "event" file access point in `/dev/input`.
+interface is. Linux assigns input devices an "event" file access point in `/de/home/$USER/input`.
 To determine which input event is your device easily, you can see if your device
 has a more friendly named access point by running this command
-`ls -l /dev/input/by-id`.
+`ls -l /de/home/$USER/input/by-id`.
 
 Example output for my footpedal:
 `lrwxrwxrwx 1 root root 9 Aug 20 15:46 usb-VEC_VEC_USB_Footpedal-event-if00 -> ../event5`
 
-In this case my device is `/dev/input/event5`.
+In this case my device is `/de/home/$USER/input/event5`.
 
 *If you wanted to you could also just use the event file in the `by-id` folder.*
 
@@ -122,7 +122,7 @@ file: `udevadm trigger --verbose --sysname-match="event*"`
 We need to find the scan codes for your device. These are the values that
 indicate which button was pressed. Now that you have your device's event
 interface you can run the follwing command to see an output of any button
-presses: `sudo evtest /dev/input/event#`
+presses: `sudo evtest /de/home/$USER/input/event#`
 
 *Replace the "#" character with your event number*
 
@@ -261,6 +261,18 @@ I'm going to cover two different ways of doing this that each have pros and
 cons. They will both run commands after reading a key press, but how they do it
 is different.
 
+ - Option **A** is `xinput test` which will require you to have a script to 
+ handle reading all the button presses. This could be used for creating unique 
+ commands for multiple devices using the same keys. 
+ - Option **B** is `xbindkeys` that will need to be installed and running. The 
+ setup is easier, but the key presses are read from all devices. 
+
+There could technically be an option **C** that uses `evtest` in nearly the 
+same way as option **A** uses `xinput test`. That wouldn't require a GUI/X 
+Server to be loaded. It would also bypass the need for the udev files. But the
+setup for that would require a bit more string manipulation than I want to get 
+into explaining here.
+
 #### A. `xinput test` / non-blocking
 
 We can directly read changes in the key state using `xinput`. With that we can
@@ -345,7 +357,9 @@ Let's go over the new stuff in this one:
  to save it as the variable id.
  - `xinput test $id | while read in ; do` First this just the key press output
  command from before using the id variable. `while read` takes the lines from
- the output and puts them in the variable `in`.
+ the output and puts them in the variable `in`. `;` marks the end of a command. 
+ `do` means that all command after this only run when the `in` variable has 
+ data.
  -  `[[ $in = "key press   ###" ]] &&` inside the `[[` `]]` is a an expression
  checking if the `$in` variable matches the output of the `xinput test` for a
  key scancode we want to perform an action for. The `&&` means that if the
@@ -353,6 +367,8 @@ Let's go over the new stuff in this one:
  - `notify-send` is a command to let you send a message as a notification in your
 Desktop Envoirnment. This would be replaced with the command you want to run
 after the button is pressed.
+ - `done` marks the end of the `while` loop. In this script, nothing after 
+ `done` will be run.
 
 
 #### B. `xbindkeys` / blocking
@@ -383,8 +399,81 @@ Here is an example setup for my pedals that lets us check it's working.
 ```
 
 
-3. Create scripts
+### 3. Create scripts
 
-Either make one script per button or a single script with a button parameter.
+Now that you have some way to run a command from a button press you can either 
+make one bash script per button or a single script that has a button parameter. If you know how to make one script that reads all the button you could know how to make multiple scripts for one button. So I will cover the parameter method. I'm going to start off by making a script called `inputAction.sh` that will accept the button presses. You can create the file anywhere you want, but when you run it you will need to specific where the file is with the complete path. So if you just have it in the root of your users folder it would be `/home/$USE/home/$USER/inputAction.sh`. I will use that as an example location for this tutorial. Let's start writing the file by first adding the bash script line:
+
+`inputAction.sh`
+```bash
+#!/bin/bash
+```
+
+Just to get you more familiar with scripting let's a add a line to print something to the terminal with `echo`:
+
+`inputAction.sh`
+```bash
+#!/bin/bash
+
+echo "test"
+```
+
+Now if the script is run it will print "test". But first to make it allowed to be run you need to mark it as executable. The command `chmod +x inputAction.sh` run in the same directory as the script will mark it as executable. There is more to linux permissions like that, but it is beyond the scope of this document. Next you can run the command, let's do it with the full path to make sure it works. All you need to do it type the location of the file as a command and it will run `/home/$USE/home/$USER/inputAction.sh`. That should have output "test" after it was run.
+
+Now let's remove the test command and add the ability to do different things based on a parameter:
+
+`inputAction.sh`
+```bash
+#!/bin/bash
+
+BUTTON=$1
+
+if [[ $BUTTON = "left" ]] ; then
+	echo "left pressed"
+fi
+
+if [[ $BUTTON = "middle" ]] ; then
+	echo "middle pressed"
+fi
+
+if [[ $BUTTON = "right" ]] ; then
+	echo "right pressed"
+fi
+
+```
+Ok, let's look at the new stuff again:
+
+ - `BUTTON=$1` is setting the variable BUTTON to be the value of the first 
+ parameter which is read with `$1`
+ - `if [[ $BUTTON = "something" ]] ; then` This says `if` the expression returns
+ 0 `then` run the next lines. `if` and `then` are separate commands that are just
+ being put on the same line with `;`. `"something"` is the name of the button 
+ you want to run the command(s) on the next line(s). You can set this to any 
+ name you want, but I would avoid spaces or special characters.
+ - `fi` marks the end of the commands to be run after `then`.
+
+*Unlike most programming lanuages, in bash a "successful" or "true" statement 
+is `0` instead of `1` or any other number. This is becase bash is meant 
+primarily as a system shell for running commands. When a command is run 
+successfully it returns a `0` to show there were no errors. If any other number 
+is returned it means the command did not run properly and the number relates to
+the type of error it had.*
+
+To use your new script you will run it with the name of the button you want the action for after the location of the script. For my script I used the button names `left`, `middle`, and `right` So if I run the command with any of those after the script location it will run one of the `echo` commands.
+
+```
+/home/$USER/inputAction.sh left
+left pressed
+```
+
+```
+/home/$USER/inputAction.sh middle
+middle pressed
+```
+
+```
+/home/$USER/inputAction.sh right
+right pressed
+```
 
 
