@@ -181,7 +181,7 @@ evdev:input:b*v05F3p00FFe*
 
 ### 7. Add keys to output to udev file
 From here you can add the names of the keys you want your device to press
-instead. You can go (here)[https://github.com/xkbcommon/libxkbcommon/blob/master/test/evdev-scancodes.h]
+instead. You can go [here](https://github.com/xkbcommon/libxkbcommon/blob/master/test/evdev-scancodes.h)
 for a full list of all keys and buttons you can map your device to use.
 
 For keys you can omit the "KEY\_" from the name of value when you use it in the
