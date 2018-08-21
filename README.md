@@ -205,7 +205,7 @@ evdev:input:b*v05F3p00FFe*
  ```
 
 
-8. Reload the udev configurations
+### 8. Reload the udev configurations
 
 That's everything you need to do to make the device output normal key presses.
 To update the loaded configurations without restarting you can run the following
@@ -218,30 +218,53 @@ sudo udevadm trigger --verbose --sysname-match="event*"
 
 
 
-   ---  Complex keyboard setup ---
+## Complex keyboard setup
 
-0. Complete simple setup
+This is how you can rebind the buttons to key combinations or to run
+commands/scripts. This can also be done with a standard keyboard.
 
-1. change keys to unusual keys
-(f13 and f15 should probably be avoided due to tab changing)
 
+### 0. Complete simple setup
+
+If you want to do this with a custom device then you will need it to be able to
+register normal key presses.
+
+### 1. Change keys to unusual keys
+
+We're going to bind keys to trigger commands. This is not specific to one device
+like the key rebinding you did with udev. So you don't really want to use keys
+you're likely going to need to press. For your custom device you can take a
+shortcut and use keys that don't exist on most keyboards now. There are F-keys
+that go beyond 1-12, all the way up to f-24 in fact. You can use those as
+virtual keys for our shortcuts to eliminate the possibility of overriding a key
+you may need later.
+
+*f13 and f15 should probably be avoided due to tab changing shortcuts in
+some browsers*
+
+I'm going to use F16-18 for my footpedal.
+
+`/etc/udev/hwdb.d/70-keyboard.hwdb`
+```
 evdev:input:b*v05F3p00FFe*
-  2  KEYBOARD_KEY_90001=f16
-  3  KEYBOARD_KEY_90002=f17
-  4  KEYBOARD_KEY_90003=f18
+# left
+ KEYBOARD_KEY_90001=f16
+# middle
+ KEYBOARD_KEY_90002=f17
+# right
+ KEYBOARD_KEY_90003=f18
+ ```
 
-2.1 xbind keys / blocking
-(init xbindkeys -d > ~/.xbindkeysrc)
-"notify-send left"
-   c:194
+### 2. Make key press run commands
 
-"notify-send middle"
-   c:195
+I'm going to cover two different ways of doing this that each have pros and
+cons. They will both run commands after reading a key press, but how they do it
+is different.
 
-"notify-send right"
-   c:196
+#### A. `xinput test` / non-blocking
 
-2.2 xinput test / non-blocking
+
+```bash
 #!/bin/bash
 #xinput list for id
 xinput test 15 | while read in ; do
@@ -250,6 +273,38 @@ xinput test 15 | while read in ; do
   [[ $in = "key press   194" ]] && notify-send right
   echo "nothing"
 done
+```
+
+#### B. `xbindkeys` / blocking
+
+Using `xbindkeys` with a configuration file will block key presses from getting
+through(in theory). You will need a configuration file in your home directory.
+After you have installed `xbindkeys`(`sudo apt install xbindkeys`) you can run
+`xbindkeys -d > ~/.xbindkeysrc` to have it create a template file that details
+how to use it. Simply put, you need a line with the command you want to run
+followed by a line with the key press that runs it. `xbindkeys` is more geared
+towards complex shortcuts that use key modifiers and can be confusing. It can be
+easiest to just use the scancode for your key. (Which you can get from `xinput
+test #` like in the A option above). Then you can just use "c:###" as your key
+`xbindkeys` will respond to.
+
+Here is an example setup for my pedals that lets check it's working.
+
+`~/.xbindkeysrc`
+```
+"notify-send left"
+   c:194
+
+"notify-send middle"
+   c:195
+
+"notify-send right"
+   c:196
+```
+
+*`notify-send` is a command to let you send a message as a notification in your
+Desktop Envoirnment*
+
 
 3. Create scripts
 
