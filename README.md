@@ -156,14 +156,14 @@ button. The scancodes you need are at the end of the line with "type 4" after
 the time. In this case my scan codes are "90001" , "90002" , and "90003".
 
 
-### 6. Aadd the scan codes to udev file
+### 6. Add the scan codes to udev file
 
 You will now add your device's scancodes to the udev file. Open it back up with
 `sudo nano /etc/udev/hwdb.d/70-keyboard.hwdb` and add more lines to the bottom
 of the file that start with " KEYBOARD\_KEY\_" and end with your scancodes.
 
 *You can also use `#` for comments in the udev file if you want to leave a note
-to exmplain which scancode is for each button*
+to explain which scancode is for each button*
 
 `/etc/udev/hwdb.d/70-keyboard.hwdb`
 ```
