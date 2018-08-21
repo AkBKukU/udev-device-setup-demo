@@ -263,6 +263,37 @@ is different.
 
 #### A. `xinput test` / non-blocking
 
+We can directly read changes in the key state using `xinput`. With that we can
+watch for the key presses and respond to them in a `bash` script. This may be a
+bit more confusing than option B but will allow you more control. First you will
+need to X input ID for your device (no relation to Microsoft's XInput for game
+controllers). You can find that with `xinput list`. Here is how my pedals show
+up in the full output:
+```
+$ xinput list
+⎡ Virtual core pointer                          id=2    [master pointer  (3)]
+⎜   ↳ Virtual core XTEST pointer                id=4    [slave  pointer  (2)]
+⎜   ↳ Wacom Intuos4 4x6 Pad pad                 id=9    [slave  pointer  (2)]
+⎜   ↳ Wacom Intuos4 4x6 Pen stylus              id=8    [slave  pointer  (2)]
+⎜   ↳ Wacom Intuos4 4x6 Pen eraser              id=11   [slave  pointer  (2)]
+⎜   ↳ Wacom Intuos4 4x6 Pen cursor              id=12   [slave  pointer  (2)]
+⎣ Virtual core keyboard                         id=3    [master keyboard (2)]
+    ↳ Virtual core XTEST keyboard               id=5    [slave  keyboard (3)]
+    ↳ Power Button                              id=6    [slave  keyboard (3)]
+    ↳ Power Button                              id=7    [slave  keyboard (3)]
+    ↳ AT Translated Set 2 keyboard              id=10   [slave  keyboard (3)]
+    ↳ VEC VEC USB Footpedal                     id=13   [slave  keyboard (3)]
+```
+
+So my pedals are `13`.
+
+This device ID may change though. So really we need to find this number
+automatically. So we going to get a bit more complicated here. This is a single
+line of bash that will get the id for my pedals:
+
+`xinput list | grep VEC | awk '{print $6}' | sed 's/id=//g'`
+
+
 
 ```bash
 #!/bin/bash
