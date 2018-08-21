@@ -101,15 +101,15 @@ evdev:input:b*v05F3p00FFe*
 
 ### 4. Find input event for device
 To read the data from the input device we need to know what the virtual
-interface is. Linux assigns input devices an "event" file access point in `/de/home/$USER/input`.
+interface is. Linux assigns input devices an "event" file access point in `/dev/input`.
 To determine which input event is your device easily, you can see if your device
 has a more friendly named access point by running this command
-`ls -l /de/home/$USER/input/by-id`.
+`ls -l /dev/input`.
 
 Example output for my footpedal:
 `lrwxrwxrwx 1 root root 9 Aug 20 15:46 usb-VEC_VEC_USB_Footpedal-event-if00 -> ../event5`
 
-In this case my device is `/de/home/$USER/input/event5`.
+In this case my device is `/dev/input/event5`.
 
 *If you wanted to you could also just use the event file in the `by-id` folder.*
 
@@ -122,7 +122,7 @@ file: `udevadm trigger --verbose --sysname-match="event*"`
 We need to find the scan codes for your device. These are the values that
 indicate which button was pressed. Now that you have your device's event
 interface you can run the follwing command to see an output of any button
-presses: `sudo evtest /de/home/$USER/input/event#`
+presses: `sudo evtest /dev/input/event#`
 
 *Replace the "#" character with your event number*
 
@@ -261,16 +261,16 @@ I'm going to cover two different ways of doing this that each have pros and
 cons. They will both run commands after reading a key press, but how they do it
 is different.
 
- - Option **A** is `xinput test` which will require you to have a script to 
- handle reading all the button presses. This could be used for creating unique 
- commands for multiple devices using the same keys. 
- - Option **B** is `xbindkeys` that will need to be installed and running. The 
- setup is easier, but the key presses are read from all devices. 
+ - Option **A** is `xinput test` which will require you to have a script to
+ handle reading all the button presses. This could be used for creating unique
+ commands for multiple devices using the same keys.
+ - Option **B** is `xbindkeys` that will need to be installed and running. The
+ setup is easier, but the key presses are read from all devices.
 
-There could technically be an option **C** that uses `evtest` in nearly the 
-same way as option **A** uses `xinput test`. That wouldn't require a GUI/X 
+There could technically be an option **C** that uses `evtest` in nearly the
+same way as option **A** uses `xinput test`. That wouldn't require a GUI/X
 Server to be loaded. It would also bypass the need for the udev files. But the
-setup for that would require a bit more string manipulation than I want to get 
+setup for that would require a bit more string manipulation than I want to get
 into explaining here.
 
 #### A. `xinput test` / non-blocking
@@ -357,8 +357,8 @@ Let's go over the new stuff in this one:
  to save it as the variable id.
  - `xinput test $id | while read in ; do` First this just the key press output
  command from before using the id variable. `while read` takes the lines from
- the output and puts them in the variable `in`. `;` marks the end of a command. 
- `do` means that all command after this only run when the `in` variable has 
+ the output and puts them in the variable `in`. `;` marks the end of a command.
+ `do` means that all command after this only run when the `in` variable has
  data.
  -  `[[ $in = "key press   ###" ]] &&` inside the `[[` `]]` is a an expression
  checking if the `$in` variable matches the output of the `xinput test` for a
@@ -367,7 +367,7 @@ Let's go over the new stuff in this one:
  - `notify-send` is a command to let you send a message as a notification in your
 Desktop Envoirnment. This would be replaced with the command you want to run
 after the button is pressed.
- - `done` marks the end of the `while` loop. In this script, nothing after 
+ - `done` marks the end of the `while` loop. In this script, nothing after
  `done` will be run.
 
 
@@ -404,7 +404,7 @@ In order for your script or `xbindkeys` to read key presses it needs to be runni
 
 ### 3. Create scripts
 
-Now that you have some way to run a command from a button press you can either 
+Now that you have some way to run a command from a button press you can either
 make one bash script per button or a single script that has a button parameter. If you know how to make one script that reads all the button you could know how to make multiple scripts for one button. So I will cover the parameter method. I'm going to start off by making a script called `inputAction.sh` that will accept the button presses. You can create the file anywhere you want, but when you run it you will need to specific where the file is with the complete path. So if you just have it in the root of your users folder it would be `/home/$USE/home/$USER/inputAction.sh`. I will use that as an example location for this tutorial. Let's start writing the file by first adding the bash script line:
 
 `inputAction.sh`
@@ -446,25 +446,25 @@ fi
 ```
 Ok, let's look at the new stuff again:
 
- - `BUTTON=$1` is setting the variable BUTTON to be the value of the first 
+ - `BUTTON=$1` is setting the variable BUTTON to be the value of the first
  parameter which is read with `$1`
  - `if [[ $BUTTON = "something" ]] ; then` This says `if` the expression returns
  0 `then` run the next lines. `if` and `then` are separate commands that are just
- being put on the same line with `;`. `"something"` is the name of the button 
- you want to run the command(s) on the next line(s). You can set this to any 
+ being put on the same line with `;`. `"something"` is the name of the button
+ you want to run the command(s) on the next line(s). You can set this to any
  name you want, but I would avoid spaces or special characters.
  - `fi` marks the end of the commands to be run after `then`.
 
-*Unlike most programming lanuages, in bash a "successful" or "true" statement 
-is `0` instead of `1` or any other number. This is becase bash is meant 
-primarily as a system shell for running commands. When a command is run 
-successfully it returns a `0` to show there were no errors. If any other number 
+*Unlike most programming lanuages, in bash a "successful" or "true" statement
+is `0` instead of `1` or any other number. This is becase bash is meant
+primarily as a system shell for running commands. When a command is run
+successfully it returns a `0` to show there were no errors. If any other number
 is returned it means the command did not run properly and the number relates to
 the type of error it had.*
 
-To use your new script you will run it with the name of the button you want the 
-action for after the location of the script. For my script I used the button 
-names `left`, `middle`, and `right` So if I run the command with any of those 
+To use your new script you will run it with the name of the button you want the
+action for after the location of the script. For my script I used the button
+names `left`, `middle`, and `right` So if I run the command with any of those
 after the script location it will run one of the `echo` commands.
 
 ```
@@ -482,7 +482,7 @@ $ /home/$USER/inputAction.sh right
 right pressed
 ```
 
-Now you can use your script as a command in the method for reading the button 
+Now you can use your script as a command in the method for reading the button
 presses. So for me the `left` button in those would look like this:
 
 Option **A**
@@ -496,22 +496,22 @@ Option **B**
    c:194
 ```
 
-If all you need to do is run commands from button presses you should have 
+If all you need to do is run commands from button presses you should have
 everything you need now.
 
 ### 4. Simulate complex key presses
 
-If you need have your buttons press a key combination such as `ctrl + c` then 
+If you need have your buttons press a key combination such as `ctrl + c` then
 you will want to use another program called `xdotool`. You will need to install
-it (`sudo apt install xdotool`) before you can try it out. Once it's installed 
+it (`sudo apt install xdotool`) before you can try it out. Once it's installed
 you can get a list of all the keys you can use with the command `xmodmap -pke`.
 
-To use `xdotool` to press a specific key combination you run the command like 
-this: `xdotool key ctrl+c`(no spaces around key names). If you need to hold a key you can use `keydown` 
-and `keyup` instead of `key`. You can also have `xdotool` type out a phrase: 
-`xdotool type "this is some text"`. 
+To use `xdotool` to press a specific key combination you run the command like
+this: `xdotool key ctrl+c`(no spaces around key names). If you need to hold a key you can use `keydown`
+and `keyup` instead of `key`. You can also have `xdotool` type out a phrase:
+`xdotool type "this is some text"`.
 
-Here is an example configuration of Option **A** key reading with shortcuts for 
+Here is an example configuration of Option **A** key reading with shortcuts for
 Blender:
 
 `inputAction.sh`
@@ -537,10 +537,10 @@ fi
 
 That's pretty much it! There are a few honorable mention features I want to add:
 
- - `xdotool getwindowfocus getwindowname` Will return the name of the current 
+ - `xdotool getwindowfocus getwindowname` Will return the name of the current
  window. You can use this to change which keys to press for a specific program.
  - You can create a [systemd](https://www.devdungeon.com/content/creating-systemd-service-files)
- service file to have your `keyListen.sh` file be loaded at startup. You'll want 
+ service file to have your `keyListen.sh` file be loaded at startup. You'll want
  to make sure it starts [after](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Automatic%20Dependencies)
  the X Server loads though.
  - `xdotool` can also control the cursor.
