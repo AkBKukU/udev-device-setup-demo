@@ -308,32 +308,67 @@ There is a lot going here so let's break it down:
  characters are use to seperate or more acurately deliniate the command, serach
  string, replace string, and options.
 
+With the ID we can read the key presses now. The command `xinput test #` will
+tell you when each key scancode is pressed and released. Here is what the output
+from the command looks like for pushing all the buttons on my pedals:
 
+```
+key press   194
+key release 194
+key press   195
+key release 195
+key press   196
+key release 196
+```
+
+Now we need to read those lines and respond when a new line matches one of the
+buttons being pressed. It will be better to just show the complete script from
+here. So this is how my pedals will be read:
+
+`keyListen.sh`
 ```bash
 #!/bin/bash
-#xinput list for id
-xinput test 15 | while read in ; do
+id="$(xinput list | grep VEC | awk '{print $6}' | sed 's/id=//g')"
+xinput test $id | while read in ; do
   [[ $in = "key press   194" ]] && notify-send left
-  [[ $in = "key press   194" ]] && notify-send middle
-  [[ $in = "key press   194" ]] && notify-send right
+  [[ $in = "key press   195" ]] && notify-send middle
+  [[ $in = "key press   196" ]] && notify-send right
   echo "nothing"
 done
 ```
 
+Let's go over the new stuff in this one:
+
+ - `#!/bin/bash` This is a line that tells `bash` to run this script through
+ `bash`
+ - `id="$(stuff)"` we're wrapping this around the part that gets the X input id
+ to save it as the variable id.
+ - `xinput test $id | while read in ; do` First this just the key press output
+ command from before using the id variable. `while read` takes the lines from
+ the output and puts them in the variable `in`.
+ -  `[[ $in = "key press   ###" ]] &&` inside the `[[` `]]` is a an expression
+ checking if the `$in` variable matches the output of the `xinput test` for a
+ key scancode we want to perform an action for. The `&&` means that if the
+ expression evaluates to 0 it runs the next command.
+ - `notify-send` is a command to let you send a message as a notification in your
+Desktop Envoirnment. This would be replaced with the command you want to run
+after the button is pressed.
+
+
 #### B. `xbindkeys` / blocking
 
-Using `xbindkeys` with a configuration file will block key presses from getting
-through(in theory). You will need a configuration file in your home directory.
-After you have installed `xbindkeys`(`sudo apt install xbindkeys`) you can run
-`xbindkeys -d > ~/.xbindkeysrc` to have it create a template file that details
-how to use it. Simply put, you need a line with the command you want to run
-followed by a line with the key press that runs it. `xbindkeys` is more geared
-towards complex shortcuts that use key modifiers and can be confusing. It can be
-easiest to just use the scancode for your key. (Which you can get from `xinput
-test #` like in the A option above). Then you can just use "c:###" as your key
-`xbindkeys` will respond to.
+Using `xbindkeys` with a configuration file will block configured key presses
+from getting through(in theory). You will need a configuration file in your
+home directory. After you have installed `xbindkeys`(`sudo apt install
+xbindkeys`) you can run `xbindkeys -d > ~/.xbindkeysrc` to have it create a
+template file that details how to use it. Simply put, you need a line with the
+command you want to run followed by a line with the key press that runs it.
+`xbindkeys` is more geared towards complex shortcuts that use key modifiers and
+can be confusing. It can be easiest to just use the scancode for your key.
+(Which you can get from `xinput test #` like in the A option above). Then you
+can just use "c:###" as your key `xbindkeys` will respond to.
 
-Here is an example setup for my pedals that lets check it's working.
+Here is an example setup for my pedals that lets us check it's working.
 
 `~/.xbindkeysrc`
 ```
@@ -347,12 +382,9 @@ Here is an example setup for my pedals that lets check it's working.
    c:196
 ```
 
-*`notify-send` is a command to let you send a message as a notification in your
-Desktop Envoirnment*
-
 
 3. Create scripts
 
-either make one script per button or a single script with a button parameter.
+Either make one script per button or a single script with a button parameter.
 
 
