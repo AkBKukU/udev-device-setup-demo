@@ -104,7 +104,7 @@ To read the data from the input device we need to know what the virtual
 interface is. Linux assigns input devices an "event" file access point in `/dev/input`.
 To determine which input event is your device easily, you can see if your device
 has a more friendly named access point by running this command
-`ls -l /dev/input`.
+`ls -l /dev/input/by-id`.
 
 Example output for my footpedal:
 `lrwxrwxrwx 1 root root 9 Aug 20 15:46 usb-VEC_VEC_USB_Footpedal-event-if00 -> ../event5`
