@@ -266,9 +266,9 @@ is different.
 We can directly read changes in the key state using `xinput`. With that we can
 watch for the key presses and respond to them in a `bash` script. This may be a
 bit more confusing than option B but will allow you more control. First you will
-need to X input ID for your device (no relation to Microsoft's XInput for game
-controllers). You can find that with `xinput list`. Here is how my pedals show
-up in the full output:
+need to know the X input ID for your device (no relation to Microsoft's XInput
+for game controllers). You can find that with `xinput list`. Here is how my
+pedals show up in the full output:
 ```
 $ xinput list
 ⎡ Virtual core pointer                          id=2    [master pointer  (3)]
@@ -293,6 +293,20 @@ line of bash that will get the id for my pedals:
 
 `xinput list | grep VEC | awk '{print $6}' | sed 's/id=//g'`
 
+There is a lot going here so let's break it down:
+
+ - First `|` is used to take the output from the left command and use it as the input
+ for the right command.
+ - `grep` is a command for filtering  data. We're just looking for any rows that
+ would match our device. So I'm searching for "VEC". You will need something
+ unique to search for your device.
+ - `awk` is really complex and does a lot. It's basically it's own scripting
+ language. We're just using it to print data from the 6th column.
+ - `sed` is a command most used for running regular expressions. In this case we
+ are using a **s**ubstitute to replace "id=" with nothing. At the end there is a
+ `g` which is the global option. It's not needed in this case. The "/"
+ characters are use to seperate or more acurately deliniate the command, serach
+ string, replace string, and options.
 
 
 ```bash
