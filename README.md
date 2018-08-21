@@ -514,6 +514,7 @@ and `keyup` instead of `key`. You can also have `xdotool` type out a phrase:
 Here is an example configuration of Option **A** key reading with shortcuts for 
 Blender:
 
+`inputAction.sh`
 ```bash
 #!/bin/bash
 # Blender control example
@@ -531,4 +532,19 @@ if [[ $BUTTON = "right" ]] ; then
 	xdotool key Prior
 fi
 ```
+
+## Wrap up
+
+That's pretty much it! There are a few honorable mention features I want to add:
+
+ - `xdotool getwindowfocus getwindowname` Will return the name of the current 
+ window. You can use this to change which keys to press for a specific program.
+ - You can create a [systemd](https://www.devdungeon.com/content/creating-systemd-service-files)
+ service file to have your `keyListen.sh` file be loaded at startup. You'll want 
+ to make sure it starts [after](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Automatic%20Dependencies)
+ the X Server loads though.
+ - `xdotool` can also control the cursor.
+ - Game controllers and joysticks can be used as well, but not in the same way.
+ `jstest` is what you want for that.
+
 
