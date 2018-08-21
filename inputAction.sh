@@ -1,16 +1,16 @@
 #!/bin/bash
-
+# Blender control example
 BUTTON=$1
 
 if [[ $BUTTON = "left" ]] ; then
-	echo "left pressed"
+	xdotool key Next
 fi
 
 if [[ $BUTTON = "middle" ]] ; then
-	echo "middle pressed"
+	xdotool key alt+a
 fi
 
 if [[ $BUTTON = "right" ]] ; then
-	echo "right pressed"
+	xdotool key Prior
 fi
 

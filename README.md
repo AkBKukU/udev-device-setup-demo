@@ -398,6 +398,9 @@ Here is an example setup for my pedals that lets us check it's working.
    c:196
 ```
 
+#### Both
+
+In order for your script or `xbindkeys` to read key presses it needs to be running. You can launch them manually if you want to, but if you want to automate it [here](https://www.cyberciti.biz/tips/linux-desktop-auto-start-or-launch-programs.html) is a guide that covers Gnome and KDE.
 
 ### 3. Create scripts
 
@@ -459,21 +462,73 @@ successfully it returns a `0` to show there were no errors. If any other number
 is returned it means the command did not run properly and the number relates to
 the type of error it had.*
 
-To use your new script you will run it with the name of the button you want the action for after the location of the script. For my script I used the button names `left`, `middle`, and `right` So if I run the command with any of those after the script location it will run one of the `echo` commands.
+To use your new script you will run it with the name of the button you want the 
+action for after the location of the script. For my script I used the button 
+names `left`, `middle`, and `right` So if I run the command with any of those 
+after the script location it will run one of the `echo` commands.
 
 ```
-/home/$USER/inputAction.sh left
+$ /home/$USER/inputAction.sh left
 left pressed
 ```
 
 ```
-/home/$USER/inputAction.sh middle
+$ /home/$USER/inputAction.sh middle
 middle pressed
 ```
 
 ```
-/home/$USER/inputAction.sh right
+$ /home/$USER/inputAction.sh right
 right pressed
 ```
 
+Now you can use your script as a command in the method for reading the button 
+presses. So for me the `left` button in those would look like this:
+
+Option **A**
+```bash
+  [[ $in = "key press   194" ]] && /home/$USER/inputAction.sh left
+```
+
+Option **B**
+```
+"/home/$USER/inputAction.sh left"
+   c:194
+```
+
+If all you need to do is run commands from button presses you should have 
+everything you need now.
+
+### 4. Simulate complex key presses
+
+If you need have your buttons press a key combination such as `ctrl + c` then 
+you will want to use another program called `xdotool`. You will need to install
+it (`sudo apt install xdotool`) before you can try it out. Once it's installed 
+you can get a list of all the keys you can use with the command `xmodmap -pke`.
+
+To use `xdotool` to press a specific key combination you run the command like 
+this: `xdotool key ctrl+c`(no spaces around key names). If you need to hold a key you can use `keydown` 
+and `keyup` instead of `key`. You can also have `xdotool` type out a phrase: 
+`xdotool type "this is some text"`. 
+
+Here is an example configuration of Option **A** key reading with shortcuts for 
+Blender:
+
+```bash
+#!/bin/bash
+# Blender control example
+BUTTON=$1
+
+if [[ $BUTTON = "left" ]] ; then
+	xdotool key Next
+fi
+
+if [[ $BUTTON = "middle" ]] ; then
+	xdotool key alt+a
+fi
+
+if [[ $BUTTON = "right" ]] ; then
+	xdotool key Prior
+fi
+```
 
