@@ -58,7 +58,7 @@ from the example.
 
 If you can't determine which device is yours in the list you can find it by
 looking for the difference of the output before and after plugging your device
-back in. Here are the commands you would run to do this.
+in. Here are the commands you would run to do this:
 
 ```
 # Have device unplugged
@@ -86,7 +86,7 @@ created earlier. In the file you will replace the "YYYY" after the "*v*" with
 your "*Vendor*" ID and the "XXXX" after the "*p*" with your "*Product*" ID.
 There are other options that can be changed in this line that we don't need
 right now. These are already set to match everything with the "\*" wildcard
-character."
+character.
 
 *udev requires that your vendor and product IDs be uppercase in this file*
 
@@ -96,12 +96,57 @@ evdev:input:b*v05F3p00FFe*
 ```
 
 
-4. use `ls -l /dev/input/by-id` to get event # or alternatively `udevadm trigger --verbose --sysname-match="event*"` and look for the USB ID
+### 4. Find input event for device
+To read the data from the input device we need to know what the virtual
+interface is. Linux assigns input devices an "event" file access point in `/dev/input`.
+To determine which input event is your device easily, you see if your device has
+a more friendly named access point by running this command `ls -l /dev/input/by-id`.
 
-5. find scan codes for your device sudo evtest /dev/input/event#
-push all buttons and note the (probably) type 4 value for each one
-Event: time 1534788138.561137, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90001
-Event: time 1534788138.561137, type 1 (EV_KEY), code 256 (BTN_0), value 0
+Example output for my footpedal:
+`lrwxrwxrwx 1 root root 9 Aug 20 15:46 usb-VEC_VEC_USB_Footpedal-event-if00 -> ../event5`
+
+In this case my device is `/dev/input/event5`.
+
+If your device isn't listed in the `by-id` folder then you can try to find the
+USB IDs in the output of this more complicated command:
+`udevadm trigger --verbose --sysname-match="event*"`
+
+
+### 5. Get the button codes for your device
+We need to find the scan codes for your device. These are the values that
+indicate which button was pressed. Now that you have your devices event
+interface you can run the follwing command to see an output of any button
+presses: `sudo evtest /dev/input/event#`
+
+While that command is running you need to press every button you want to map
+once to print the scan codes. Here is what the output of my device looks like:
+
+```
+Event: time 1534811478.747420, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90001
+Event: time 1534811478.747420, type 1 (EV_KEY), code 256 (BTN_0), value 1
+Event: time 1534811478.747420, -------------- SYN_REPORT ------------
+Event: time 1534811478.755413, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90001
+Event: time 1534811478.755413, type 1 (EV_KEY), code 256 (BTN_0), value 0
+Event: time 1534811478.755413, -------------- SYN_REPORT ------------
+Event: time 1534811485.083432, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90002
+Event: time 1534811485.083432, type 1 (EV_KEY), code 256 (BTN_0), value 1
+Event: time 1534811485.083432, -------------- SYN_REPORT ------------
+Event: time 1534811485.403417, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90002
+Event: time 1534811485.403417, type 1 (EV_KEY), code 256 (BTN_0), value 0
+Event: time 1534811485.403417, -------------- SYN_REPORT ------------
+Event: time 1534811492.659436, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90003
+Event: time 1534811492.659436, type 1 (EV_KEY), code 256 (BTN_0), value 1
+Event: time 1534811492.659436, -------------- SYN_REPORT ------------
+Event: time 1534811492.787439, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90003
+Event: time 1534811492.787439, type 1 (EV_KEY), code 256 (BTN_0), value 0
+Event: time 1534811492.787439, -------------- SYN_REPORT ------------
+```
+
+It prints once when you depress the button and release the button. The
+scancodes you need are at the end of the line with "type 4" after the time. In
+this case my scan codes are "90001" , "90002" , and "90003".
+
+
 
 6. Go back to the new conf file and add the scan codes
 (like python, you must have the space)
