@@ -114,14 +114,14 @@ In this case my device is `/dev/input/event5`.
 *If you wanted to you could also just use the event file in the `by-id` folder.*
 
 If your device isn't listed in the `by-id` folder then you can try to find the
-USB IDs in the output of this more complicated command to match to your even
+USB IDs in the output of this more complicated command to match to your event
 file: `udevadm trigger --verbose --sysname-match="event*"`
 
 
 ### 5. Get the button codes for your device
 We need to find the scan codes for your device. These are the values that
 indicate which button was pressed. Now that you have your device's event
-interface you can run the follwing command to see an output of any button
+interface you can run the following command to see an output of any button
 presses: `sudo evtest /dev/input/event#`
 
 *Replace the "#" character with your event number*
@@ -160,10 +160,10 @@ the time. In this case my scan codes are "90001" , "90002" , and "90003".
 
 You will now add your device's scancodes to the udev file. Open it back up with
 `sudo nano /etc/udev/hwdb.d/70-keyboard.hwdb` and add more lines to the bottom
-of the file that start with " KEYBOARD\_KEY\_" and end with your scancodes.
+of the file that starts with " KEYBOARD\_KEY\_" and end with your scancodes.
 
 *You can also use `#` for comments in the udev file if you want to leave a note
-to explain which scancode is for each button*
+to explain which scancode is for*
 
 `/etc/udev/hwdb.d/70-keyboard.hwdb`
 ```
@@ -179,19 +179,18 @@ evdev:input:b*v05F3p00FFe*
 *Note: You must have the space in front of the lines with the scancodes*
 
 
-### 7. Add keys to output to udev file
+### 7. Add keys to output in udev file
 From here you can add the names of the keys you want your device to press
 instead. You can go [here](https://github.com/xkbcommon/libxkbcommon/blob/master/test/evdev-scancodes.h)
 for a full list of all keys and buttons you can map your device to use.
 
-For keys you can omit the "KEY\_" from the name of value when you use it in the
-udev file. If you use any "BTN\_" values you need the first part. The names of
-the keys or btns you add also need to be lowercase. For the keys you want to set
-add "=" followed by the key to the end of each scancode line to set it to be
+For keys you can omit the "KEY\_" from the name of the value when you use it in
+the udev file. If you use any "BTN\_" values you need the first part. The names
+of the keys or btns you add also need to be lowercase. For the keys you want to
+set add "=" followed by the key to the end of each scancode line to set it to be
 equal to that key.
 
-Here is how my file looks like when setup to use the pedals for movement in a
-game:
+Here is how my file looks when setup to use the pedals for movement in a game:
 
 `/etc/udev/hwdb.d/70-keyboard.hwdb`
 ```
@@ -231,9 +230,9 @@ register normal key presses.
 
 ### 1. Change keys to unusual keys
 
-We're going to bind keys to trigger commands. This is not specific to one device
-like the key rebinding you did with udev. So you don't really want to use keys
-you're likely going to need to press. For your custom device you can take a
+We're going to bind keys to trigger commands. This is may not be specific to one
+device like the key rebinding you did with udev. So you don't really want to use
+keys you're likely going to need to press. For your custom device you can take a
 shortcut and use keys that don't exist on most keyboards now. There are F-keys
 that go beyond 1-12, all the way up to f-24 in fact. You can use those as
 virtual keys for our shortcuts to eliminate the possibility of overriding a key
@@ -257,9 +256,9 @@ evdev:input:b*v05F3p00FFe*
 
 ### 2. Make key press run commands
 
-I'm going to cover two different ways of doing this that each have pros and
-cons. They will both run commands after reading a key press, but how they do it
-is different.
+I'm going to cover two different ways of doing this and each have pros and cons.
+They will both run commands after reading a key press, but how they do it is
+different.
 
  - Option **A** is `xinput test` which will require you to have a script to
  handle reading all the button presses. This could be used for creating unique
